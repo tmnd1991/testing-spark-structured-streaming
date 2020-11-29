@@ -17,7 +17,7 @@
 
 package org.apache.spark.sql
 
-import java.util.{Locale, TimeZone}
+import java.util.{ Locale, TimeZone }
 
 import com.github.tmnd1991.spark.testing.SparkFunSuite
 import org.apache.spark.sql.catalyst.plans._
@@ -25,7 +25,7 @@ import org.apache.spark.sql.catalyst.util._
 import org.apache.spark.sql.execution.columnar.InMemoryRelation
 
 import scala.collection.JavaConverters._
-import scala.util.{Failure, Success}
+import scala.util.{ Failure, Success }
 
 //scalastyle:off cyclomatic
 abstract class QueryTest extends SparkFunSuite with PlanTest {
@@ -122,7 +122,7 @@ abstract class QueryTest extends SparkFunSuite with PlanTest {
 
   private def compare(obj1: Any, obj2: Any): Boolean =
     (obj1, obj2) match {
-      case (null, null) => true  // scalastyle:ignore
+      case (null, null) => true // scalastyle:ignore
       case (null, _)    => false // scalastyle:ignore
       case (_, null)    => false // scalastyle:ignore
       case (a: Array[_], b: Array[_]) =>
@@ -135,8 +135,8 @@ abstract class QueryTest extends SparkFunSuite with PlanTest {
   /**
    * Runs the plan and makes sure the answer matches the expected result.
    *
-   * @param df the [[DataFrame]] to be executed
-   * @param expectedAnswer the expected result in a [[Seq]] of [[Row]]s.
+   * @param df the `DataFrame` to be executed
+   * @param expectedAnswer the expected result in a `Seq` of `Rows`.
    */
   protected def checkAnswer(df: => DataFrame, expectedAnswer: Seq[Row]): Unit = {
     val analyzedDF =
@@ -172,8 +172,8 @@ abstract class QueryTest extends SparkFunSuite with PlanTest {
   /**
    * Runs the plan and makes sure the answer is within absTol of the expected result.
    *
-   * @param dataFrame the [[DataFrame]] to be executed
-   * @param expectedAnswer the expected result in a [[Seq]] of [[Row]]s.
+   * @param dataFrame the `DataFrame` to be executed
+   * @param expectedAnswer the expected result in a `Seq` of `Rows`.
    * @param absTol the absolute tolerance between actual and expected answers.
    */
   protected def checkAggregatesWithTol(dataFrame: DataFrame, expectedAnswer: Seq[Row], absTol: Double): Unit = {
@@ -184,9 +184,8 @@ abstract class QueryTest extends SparkFunSuite with PlanTest {
       s"actual num rows ${actualAnswer.length} != expected num of rows ${expectedAnswer.length}"
     )
 
-    actualAnswer.zip(expectedAnswer).foreach {
-      case (actualRow, expectedRow) =>
-        QueryTest.checkAggregatesWithTol(actualRow, expectedRow, absTol)
+    actualAnswer.zip(expectedAnswer).foreach { case (actualRow, expectedRow) =>
+      QueryTest.checkAggregatesWithTol(actualRow, expectedRow, absTol)
     }
   }
 
@@ -194,12 +193,12 @@ abstract class QueryTest extends SparkFunSuite with PlanTest {
     checkAggregatesWithTol(dataFrame, Seq(expectedAnswer), absTol)
 
   /**
-   * Asserts that a given [[Dataset]] will be executed using the given number of cached results.
+   * Asserts that a given `Dataset` will be executed using the given number of cached results.
    */
   def assertCached(query: Dataset[_], numCachedTables: Int = 1): Unit = {
     val planWithCaching = query.queryExecution.withCachedData
-    val cachedData = planWithCaching collect {
-      case cached: InMemoryRelation => cached
+    val cachedData = planWithCaching collect { case cached: InMemoryRelation =>
+      cached
     }
 
     val _ = assert(
@@ -210,7 +209,7 @@ abstract class QueryTest extends SparkFunSuite with PlanTest {
   }
 
   /**
-   * Asserts that a given [[Dataset]] does not have missing inputs in all the analyzed plans.
+   * Asserts that a given `Dataset` does not have missing inputs in all the analyzed plans.
    */
   def assertEmptyMissingInput(query: Dataset[_]): Unit = {
     assert(
@@ -233,11 +232,11 @@ object QueryTest {
   /**
    * Runs the plan and makes sure the answer matches the expected result.
    * If there was exception during the execution or the contents of the DataFrame does not
-   * match the expected result, an error message will be returned. Otherwise, a [[None]] will
+   * match the expected result, an error message will be returned. Otherwise, a `None` will
    * be returned.
    *
-   * @param df the [[DataFrame]] to be executed
-   * @param expectedAnswer the expected result in a [[Seq]] of [[Row]]s.
+   * @param df the `DataFrame` to be executed
+   * @param expectedAnswer the expected result in a `Seq` of `Row`s.
    * @param checkToRDD whether to verify deserialization to an RDD. This runs the query twice.
    */
   def checkAnswer(df: DataFrame, expectedAnswer: Seq[Row], checkToRDD: Boolean = true): Option[String] = {
@@ -347,8 +346,8 @@ object QueryTest {
   /**
    * Runs the plan and makes sure the answer is within absTol of the expected result.
    *
-   * @param actualAnswer the actual result in a [[Row]].
-   * @param expectedAnswer the expected result in a[[Row]].
+   * @param actualAnswer the actual result in a `Row`.
+   * @param expectedAnswer the expected result in a `Row`.
    * @param absTol the absolute tolerance between actual and expected answers.
    */
   protected def checkAggregatesWithTol(actualAnswer: Row, expectedAnswer: Row, absTol: Double) = {

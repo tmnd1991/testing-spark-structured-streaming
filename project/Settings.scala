@@ -4,7 +4,6 @@ object Settings {
 
   val name: String = "testing-spark-structured-streaming"
   val organization: String = "com.github.tmnd1991"
-
   val scala_211 = "2.11.12"
   val scala = "2.12.12"
   val crossScalaVersions = Seq(scala_211, scala)
