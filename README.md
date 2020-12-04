@@ -1,8 +1,8 @@
 # testing-spark-structured-streaming
 
-Who loves Apache Spark Structured Streaming? 🙋‍
+Who loves Apache Spark Structured Streaming? 🙋‍♂️
 
-Who hates the fact that testing streaming queries is very difficult? 🙋‍
+Who hates the fact that testing streaming queries is very difficult? 🙋‍♂️
 
 That's why this library exists: to expose a nice and *pure* API to test Apache Spark Structured
 Streaming queries.
@@ -23,12 +23,12 @@ class TestTheQueryTest extends QueryTest with StreamTest {
     
     testStream(res)(
       StartStream(Trigger.ProcessingTime(10), new StreamManualClock),
-      AddData(source, staticInput.next()),
+      AddData(source, staticInput.head),
       AdvanceManualClock(10),
       CheckNewAnswer(7),
       AddData(
         source,
-        staticInput.take(2).toList: _*
+        staticInput.drop(1): _*
       ),
       AdvanceManualClock(10),
       CheckNewAnswer()
