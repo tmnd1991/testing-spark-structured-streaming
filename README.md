@@ -58,6 +58,27 @@ Or this to your pom.xml:
 </dependency>
 ```
 
+And if you want to depend on some snapshot version, you need to add sonatype snapshot repository:
+
+On sbt:
+
+```scala
+resolvers += Resolver.sonatypeRepo("snapshots")
+```
+
+On maven:
+
+```xml
+<repositories>
+  <repository>
+    <id>snapshots-repo</id>
+    <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    <releases><enabled>false</enabled></releases>
+    <snapshots><enabled>true</enabled></snapshots>
+  </repository>
+</repositories>
+```
+
 ## How to contribute
 
 Found a bug? ➡ Open an issue!
