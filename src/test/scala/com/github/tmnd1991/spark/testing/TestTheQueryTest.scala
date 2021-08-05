@@ -2,10 +2,10 @@ package com.github.tmnd1991.spark.testing
 
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.execution.streaming.MemoryStream
-import org.apache.spark.sql.functions.{ col, lit }
+import org.apache.spark.sql.functions.{col, lit}
 import org.apache.spark.sql.streaming._
 import org.apache.spark.sql.streaming.util.StreamManualClock
-import org.apache.spark.sql.{ Encoders, QueryTest }
+import org.apache.spark.sql.{Encoders, QueryTest, Row}
 import org.scalatest.time.Span
 import org.scalatest.time.SpanSugar._
 
@@ -17,7 +17,78 @@ class TestTheQueryTest extends QueryTest with StreamTest with Logging {
 
   override val streamingTimeout: Span = 1000.minutes
 
-  test("Dante count test") {
+  test("Testing a query that count the lenght of the word given in input") {
+    import spark.implicits._
+    val staticInput = List(
+      "Nel",
+      "mezzo",
+      "del",
+      "cammin"
+    )
+    val source = MemoryStream[String](0, spark.sqlContext)
+    val res = source.toDS().map(_.length)
+
+    testStream(res)(
+      StartStream(Trigger.ProcessingTime(10), new StreamManualClock),
+      AddData(source, staticInput.head),  // passing the first element to the query ==> nel
+      AdvanceManualClock(10),
+      CheckNewAnswer(3),
+      AddData(
+        source,
+        staticInput(1) // passing the second element to the query ==> mezzo
+      ),
+      AdvanceManualClock(10),
+      CheckAnswer(5) // mezzo is composed by 5 letters
+
+      // and so on, let's see another more complex example
+    )
+  }
+
+  test("Testing a query that count the lenght of the word given in input") {
+    import spark.implicits._
+    val staticInput = List(
+      "Nel",
+      "mezzo",
+      "del",
+      "cammin",
+      "di",
+      "nostra",
+      "vita",
+      "mi",
+      "ritrovai",
+      "per",
+      "una",
+      "selva",
+      "oscura",
+      "ché",
+      "la",
+      "diritta",
+      "via",
+      "era",
+      "smarrita."
+    )
+    val source = MemoryStream[String](0, spark.sqlContext)
+    val res = source.toDS().map(_.length)
+
+    testStream(res)(
+      StartStream(Trigger.ProcessingTime(10), new StreamManualClock),
+      AddData(source, staticInput.head),
+      AdvanceManualClock(10),
+      CheckNewAnswer(3),
+      AddData(
+        source,
+        staticInput.drop(1): _*
+      ),
+      AdvanceManualClock(10),
+      CheckAnswerRows(
+        staticInput.drop(1).map(e => Row(e.length)), // checking the remaining answers
+        lastOnly = true,
+        isSorted = false
+      )
+    )
+  }
+
+  test("Dante more complex query") {
     import spark.implicits._
     val staticInput = commediaDf
       .take(3)
