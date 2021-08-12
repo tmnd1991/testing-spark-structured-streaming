@@ -15,24 +15,97 @@ class TestTheQueryTest extends QueryTest with StreamTest {
 
   override val streamingTimeout: Span = 1000.minutes // to set after how long a test should fail
 
-  test("Dante count test") {
+  test("Testing a query that count the lenght of the word given a small list of world as input") {
     import spark.implicits._
-    val staticInput = List(...)
+    val staticInput = List(
+      "Nel",
+      "mezzo",
+      "del",
+      "cammin"
+    )
     val source = MemoryStream[String](0, spark.sqlContext)
-    val res = source.toDS().map(_.split("\\s+").length).where(col("value").gt(lit(6)))
-    
+    val res = source.toDS().map(_.length)
+
+    testStream(res)(
+      StartStream(Trigger.ProcessingTime(10), new StreamManualClock),
+      AddData(source, staticInput.head),  // passing the first element to the query ==> nel
+      AdvanceManualClock(10),
+      CheckNewAnswer(3),
+      AddData(
+        source,
+        staticInput(1) // passing the second element to the query ==> mezzo
+      ),
+      AdvanceManualClock(10),
+      CheckAnswer(3,5) // mezzo is composed by 5 letters
+
+      // and so on, let's see another more complex example
+    )
+  }
+
+  test("Testing a query that count the lenght of the word given a big list of world as input") {
+    import spark.implicits._
+    val staticInput = List(
+      "Nel",
+      "mezzo",
+      "del",
+      "cammin",
+      "di",
+      "nostra",
+      "vita",
+      "mi",
+      "ritrovai",
+      "per",
+      "una",
+      "selva",
+      "oscura",
+      "ché",
+      "la",
+      "diritta",
+      "via",
+      "era",
+      "smarrita."
+    )
+    val source = MemoryStream[String](0, spark.sqlContext)
+    val res = source.toDS().map(_.length)
+
     testStream(res)(
       StartStream(Trigger.ProcessingTime(10), new StreamManualClock),
       AddData(source, staticInput.head),
       AdvanceManualClock(10),
-      CheckNewAnswer(7),
+      CheckNewAnswer(3),
       AddData(
         source,
         staticInput.drop(1): _*
       ),
       AdvanceManualClock(10),
+      CheckAnswerRows(
+        staticInput.drop(1).map(e => Row(e.length)), // checking the remaining answers
+        lastOnly = true,
+        isSorted = false
+      )
+    )
+  }
+
+  test("Dante more complex query") {
+    import spark.implicits._
+    val staticInput = commediaDf
+      .take(3)
+      .iterator
+    val source = MemoryStream[String](0, spark.sqlContext)
+    val res = source.toDS().map(_.split("\\s+").length).where(col("value").gt(lit(6)))
+    testStream(res)(
+      StartStream(Trigger.ProcessingTime(10), new StreamManualClock),
+      AddData(source, staticInput.next()),
+      AdvanceManualClock(10),
+      CheckNewAnswer(7),
+      AddData(
+        source,
+        staticInput.take(2).toList: _*
+      ),
+      AdvanceManualClock(10),
       CheckNewAnswer()
     )
+  }
 ```
 
 As you can see, the `testStream` part is just "pushing" events into the streaming query, 

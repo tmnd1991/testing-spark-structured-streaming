@@ -18,17 +18,15 @@
 package com.github.tmnd1991.spark.testing
 
 import java.io.File
-
 import org.apache.spark.Bridge
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.SparkSession
-import org.scalatest.{ BeforeAndAfterAll, FunSuite, Outcome }
+import org.scalatest.{BeforeAndAfterAll, FunSuite, Outcome}
 
 /**
  * Base abstract class for all unit tests in Spark for handling common functionality.
  */
 abstract class SparkFunSuite extends FunSuite with BeforeAndAfterAll with Logging {
-
   lazy val spark: SparkSession = SparkFunSuite.spark.newSession()
 
   // Avoid leaking map entries in tests that use accumulators without SparkContext
@@ -68,13 +66,14 @@ object SparkFunSuite {
     val ss = SparkSession
       .builder()
       .appName("test")
-      .config("spark.sql.warehouse.dir", warehouseLocation)
-      .config("spark.master", "local[1,4]")
       .config("spark.ui.enabled", "true")
-      .config("spark.sql.shuffle.partitions", "1")
+      .config("spark.master", "local[1,4]")
       .config("spark.task.maxFailures", "4")
+      .config("spark.testing", value = true)
+      .config("spark.sql.shuffle.partitions", "1")
       .config("spark.sql.session.timeZone", "UTC")
-      .config("spark.testing", true)
+      .config("spark.driver.bindAddress", "127.0.0.1")
+      .config("spark.sql.warehouse.dir", warehouseLocation)
       .getOrCreate()
     sys.addShutdownHook {
       ss.close()
