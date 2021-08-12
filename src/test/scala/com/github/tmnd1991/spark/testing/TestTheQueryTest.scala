@@ -5,19 +5,19 @@ import org.apache.spark.sql.execution.streaming.MemoryStream
 import org.apache.spark.sql.functions.{col, lit}
 import org.apache.spark.sql.streaming._
 import org.apache.spark.sql.streaming.util.StreamManualClock
-import org.apache.spark.sql.{Encoders, QueryTest, Row}
+import org.apache.spark.sql.{Dataset, Encoders, QueryTest, Row}
 import org.scalatest.time.Span
 import org.scalatest.time.SpanSugar._
 
 class TestTheQueryTest extends QueryTest with StreamTest with Logging {
 
-  lazy val commediaDf = spark.read
+  lazy val commediaDf: Dataset[String] = spark.read
     .text(getTestResourcePath("divinacommedia.txt"))
     .as[String](Encoders.STRING)
 
   override val streamingTimeout: Span = 1000.minutes
 
-  test("Testing a query that count the lenght of the word given in input") {
+  test("Testing a query that count the lenght of the word given a small list of world as input") {
     import spark.implicits._
     val staticInput = List(
       "Nel",
@@ -38,13 +38,13 @@ class TestTheQueryTest extends QueryTest with StreamTest with Logging {
         staticInput(1) // passing the second element to the query ==> mezzo
       ),
       AdvanceManualClock(10),
-      CheckAnswer(5) // mezzo is composed by 5 letters
+      CheckAnswer(3,5) // mezzo is composed by 5 letters
 
       // and so on, let's see another more complex example
     )
   }
 
-  test("Testing a query that count the lenght of the word given in input") {
+  test("Testing a query that count the lenght of the word given a big list of world as input") {
     import spark.implicits._
     val staticInput = List(
       "Nel",

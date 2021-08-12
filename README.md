@@ -15,7 +15,7 @@ class TestTheQueryTest extends QueryTest with StreamTest {
 
   override val streamingTimeout: Span = 1000.minutes // to set after how long a test should fail
 
-  test("Testing a query that count the lenght of the word given in input") {
+  test("Testing a query that count the lenght of the word given a small list of world as input") {
     import spark.implicits._
     val staticInput = List(
       "Nel",
@@ -36,13 +36,13 @@ class TestTheQueryTest extends QueryTest with StreamTest {
         staticInput(1) // passing the second element to the query ==> mezzo
       ),
       AdvanceManualClock(10),
-      CheckAnswer(5) // mezzo is composed by 5 letters
+      CheckAnswer(3,5) // mezzo is composed by 5 letters
 
       // and so on, let's see another more complex example
     )
   }
 
-  test("Testing a query that count the lenght of the word given in input") {
+  test("Testing a query that count the lenght of the word given a big list of world as input") {
     import spark.implicits._
     val staticInput = List(
       "Nel",
